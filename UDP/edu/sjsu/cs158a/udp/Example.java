@@ -46,12 +46,15 @@ public class Example {
 
     @Command(name = "server", description = "simple UDP server that receives messages and prints them")
     public void serverCli(@Parameters(paramLabel = "port", description = "UDP port to listen on") int port) throws IOException {
-        var bytes = new byte[512];
-        var packet = new DatagramPacket(bytes, bytes.length);
         try (var sock = new DatagramSocket(port)) {
             while (true) {
+                var bytes = new byte[512];
+                var packet = new DatagramPacket(bytes, bytes.length);
                 sock.receive(packet);
                 System.out.printf("from %s: %s\n", packet.getSocketAddress(), new String(bytes, 0, packet.getLength()));
+                packet.setData("hello!".getBytes());
+                sock.send(packet);
+                System.out.printf("to %s: %s\n", packet.getSocketAddress(), new String(bytes, 0, packet.getLength()));
             }
         }
     }
