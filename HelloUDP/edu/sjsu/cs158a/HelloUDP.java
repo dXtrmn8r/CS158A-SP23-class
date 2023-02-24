@@ -10,6 +10,7 @@ import picocli.CommandLine.Spec;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -24,6 +25,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -57,6 +59,9 @@ public class HelloUDP implements Callable<Integer> {
     boolean showTime;
     @Option(names = "--debug")
     boolean debug;
+
+    @Option(names = "--badchecksum")
+    boolean badChecksum;
 
     static private void checkError(ByteBuffer bb) {
         if (bb.getShort() == ERROR) {
@@ -149,6 +154,7 @@ public class HelloUDP implements Callable<Integer> {
     }
 
     public Integer call() throws InterruptedException {
+        Random rand = new Random();
         CliUtil.enableDebug(debug);
         final var baseName = "ottoTA";
         var threads = new ArrayList<Thread>();
@@ -204,20 +210,25 @@ public class HelloUDP implements Callable<Integer> {
                         offset += rc;
                     }
 
-                    bb.clear().putShort(CHECKSUM).putInt(conversationId).put(fis.getMessageDigest().digest(), 0, 8).flip();
+                    byte[] digest = fis.getMessageDigest().digest();
+                    if (badChecksum) {
+                        //  mix the digest up if we want a bad checksum
+                        rand.nextBytes(digest);
+                    }
+                    bb.clear().putShort(CHECKSUM).putInt(conversationId).put(digest, 0, 8).flip();
                     dpack.setLength(bb.remaining());
                     var checksumRecv = sendRecv(dsock, dpack);
                     recvBB = ByteBuffer.wrap(checksumRecv.getData(), checksumRecv.getOffset(), checksumRecv.getLength());
                     checkError(recvBB);
                     recvBB.getShort(); // skip the type
                     recvBB.getInt(); // skip the conv id
-                    int type = recvBB.get();
-                    if (type == 0) {
+                    rc = recvBB.get();
+                    if (rc == 0) {
                         if (showTime) {
-                            info("success! Took about %dms\n", System.currentTimeMillis() - startClock);
+                            info("success! Took about {0}ms\n", System.currentTimeMillis() - startClock);
                         }
                     } else {
-                        error("failure: " + type + " " + new String(bb.array(), bb.position(), bb.remaining()));
+                        error("failure: {0}", rc);
                     }
                 } catch (IOException | NoSuchAlgorithmException | InterruptedException e) {
                     e.printStackTrace();
