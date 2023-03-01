@@ -16,7 +16,7 @@ public class Here {
         myidBytes[0] = myid >> 24;
         myidBytes[1] = (byte)((myid >> 16) & 0xff);
         myidBytes[2] = (byte)((myid >> 8) & 0xff);
-        myidBytes[3] = myid && 0xff;
+        myidBytes[3] = (byte)(myid & 0xff);
         var name = "mr frog";
         var nameBytes = name.getBytes();
         out.write(myidBytes);

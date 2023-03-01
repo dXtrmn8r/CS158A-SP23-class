@@ -6,6 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/TCP" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/UDP" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/HelloUDP" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/web" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
