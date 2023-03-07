@@ -13,6 +13,11 @@ public class MyParser {
         @Override
         public void handleStartTag(HTML.Tag t, MutableAttributeSet a, int pos) {
             System.out.println("Got tag: "+ t + " with attributes: " + a);
+            // to check for specific tags
+            System.out.println("Is title: " + HTML.Tag.TITLE.equals(t));
+            // or
+            // System.out.println("Is title: " + (HTML.Tag.TITLE == t))
+            // Also, refer to HTML.Attribute HREF on JDK API;
             super.handleStartTag(t, a, pos);
         }
 
