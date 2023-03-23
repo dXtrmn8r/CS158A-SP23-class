@@ -10,24 +10,26 @@ import java.net.Socket;
 
 public class Server {
     static void handleClient(Socket s) {
-        try {
+        try (s) {
             System.out.println(s);
             var bris = new BufferedReader(new InputStreamReader(s.getInputStream()));
             var bros = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
-            bros.append("Hello! welcome to server!\n");
+            System.out.println("sending welcome");
+            bros.append("Hello! welcome to server!\n").flush();
+            System.out.println("sent welcome");
             System.out.println("Client says: " + bris.readLine());
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                s.close();
-            } catch (IOException e) {}
         }
     }
     public static void main(String[] args) throws IOException {
         try (var ss = new ServerSocket(3333)) {
+            System.out.println("Listing on " + ss);
             while (true) {
-                handleClient(ss.accept());
+                final Socket s = ss.accept();
+                new Thread(() -> {
+                    handleClient(s);
+                }).start();
             }
         }
     }
