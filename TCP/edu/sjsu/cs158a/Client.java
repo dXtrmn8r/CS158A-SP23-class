@@ -13,7 +13,9 @@ public class Client {
         System.out.println(s);
         var bris = new BufferedReader(new InputStreamReader(s.getInputStream()));
         var bros = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
+        System.out.println("going to read from server");
         System.out.println("from server: " + bris.readLine());
-        bros.append("goodbye\n");
+        System.out.println("read from server");
+        bros.append("goodbye\n").flush();
     }
 }
