@@ -36,6 +36,7 @@ public class Main {
             var rsp = stub.add(request);
             System.out.println(rsp.getResult());
         } catch (StatusRuntimeException e) {
+            e.printStackTrace();
             System.out.println("problem communicating with " + hostPort);
         }
         return 0;
@@ -44,15 +45,25 @@ public class Main {
     @Command
     int server(@Parameters(paramLabel = "port") int port) throws InterruptedException {
         class AddExampleImpl extends AddExampleGrpc.AddExampleImplBase {
-
+            int total = 0;
             @Override
             public void add(Messages.AddExampleRequest request,
                             StreamObserver<Messages.AddExampleResponse> responseObserver) {
                 var a = request.getA();
                 var b = request.getB();
                 var sum = a + b;
+                int myTotal;
+                synchronized (this) {
+                    total += sum;
+                    myTotal = total;
+                }
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 var response = Messages.AddExampleResponse.newBuilder()
-                        .setResult(MessageFormat.format("{0} + {1} = {2}", a, b, sum))
+                        .setResult(MessageFormat.format("{0} + {1} = {2} total {3}", a, b, sum, myTotal))
                         .build();
                 responseObserver.onNext(response);
                 responseObserver.onCompleted();
