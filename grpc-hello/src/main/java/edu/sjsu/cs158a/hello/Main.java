@@ -149,11 +149,6 @@ public class Main {
                         addCode = 0;
                     }
                 }
-                try {
-                    Thread.sleep(3000,0);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
 
                 var response = Messages.CodeResponse.newBuilder()
                         .setRc(rc).setAddcode(addCode).build();
